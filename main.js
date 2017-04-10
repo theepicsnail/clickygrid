@@ -36,13 +36,16 @@ function mapDefault(x, y) {
 
     val = (val - min) / (max - min);
 
+    let v = 0;
     if (val < .2)
-        return 0; // grey
-    if (val < .4)
-        return 1; // red
-    if (val < .6)
-        return 2; // green
-    return 3;
+        v = 0; // grey
+    else if (val < .4)
+        v = 1; // red
+    else if (val < .6)
+        v = 2; // green
+    else
+        v = 3; // blue
+    return {value: v};
 }
 
 
@@ -103,24 +106,27 @@ class Chunk {
 
         this.ctx = this.image.getContext("2d");
 
-        this.values = {};
-
-        for (var y = 0; y < blockSize; y++)
-            for (var x = 0; x < blockSize; x++)
-                this.values[[x, y]] = mapDefault(this.x * blockSize + x, this.y * blockSize + y);
 
         this.ref = firebase.database().ref(`/chunks/${this.x},${this.y}`);
         this.ref.on('value', (v) => {
-                let update = v.val();
-                if (update != null) {
-                    for (var k in update)
-                        this.values[k] = update[k]['value'];
-                }
-                this.redraw();
-            }
-        )
-        ;
+            this.dbUpdate(v.val());
+        });
+
     }
+
+    dbUpdate(update) {
+        if (update == null) {
+            update = {};
+        }
+
+        this.values = {};
+        for (var y = 0; y < blockSize; y++)
+            for (var x = 0; x < blockSize; x++) {
+                this.values[[x, y]] = update[[x, y]] || mapDefault(this.x * blockSize + x, this.y * blockSize + y);
+            }
+        this.redraw();
+    }
+
 
     unload() {
         // console.log("unload chunk", this.x, this.y);
@@ -129,7 +135,7 @@ class Chunk {
     redraw() {
         for (var y = 0; y < blockSize; y++)
             for (var x = 0; x < blockSize; x++) {
-                let val = this.values[[x, y]];
+                let val = this.values[[x, y]]['value'];
                 game.resources.drawTile("tiles.png", val, 0, this.ctx, x * tileSize, y * tileSize);
             }
 
@@ -142,10 +148,14 @@ class Chunk {
      * @param y
      */
     clicked(x, y) {
-        this.values
-        this.ref.child(`${x},${y}`).set({
-            'value': ((this.values[[x, y]] || 0) + 1) % 4
-        });
+        const def = mapDefault(this.x * blockSize + x, this.y * blockSize + y);
+        const next = {'value': ((this.values[[x, y]]['value'] || 0) + 1) % 4};
+        const ref = this.ref.child(`${x},${y}`);
+
+        if (next.value == def.value)
+            ref.remove();
+        else
+            ref.set(next);
     }
 }
 
@@ -178,6 +188,7 @@ class User {
 
     update(details) {
         game.camera.setCenter(details.x, details.y);
+
     }
 }
 
@@ -255,7 +266,7 @@ class Camera {
         game.chunkManager.forEachChunk((chunk) => {
             this.redrawChunk(chunk);
         });
-        
+
     }
 
     redrawChunk(chunk) {
