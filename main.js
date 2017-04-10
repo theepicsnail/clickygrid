@@ -122,7 +122,8 @@ class Chunk {
 
 
     unload() {
-        // console.log("unload chunk", this.x, this.y);
+        this.ref.off();
+        delete this.image;
     }
 
     redraw() {
@@ -232,10 +233,12 @@ class Camera {
         this.screenTop = Math.floor(this.y - h2);
         const screenRight = Math.ceil(this.x + w2);
         const screenBot = Math.ceil(this.y + h2);
-        const chunkLeft = Math.floor(this.screenLeft / pixelsPerChunk);
-        const chunkTop = Math.floor(this.screenTop / pixelsPerChunk);
-        const chunkRight = Math.ceil(screenRight / pixelsPerChunk);
-        const chunkBot = Math.ceil(screenBot / pixelsPerChunk);
+
+        // Expand by 1 so that scrolling already has the next chunk.
+        const chunkLeft = Math.floor(this.screenLeft / pixelsPerChunk) -1;
+        const chunkTop = Math.floor(this.screenTop / pixelsPerChunk) -1;
+        const chunkRight = Math.ceil(screenRight / pixelsPerChunk) + 1;
+        const chunkBot = Math.ceil(screenBot / pixelsPerChunk) + 1;
 
         this.ctx.setTransform(1, 0, 0, 1, -this.screenLeft, -this.screenTop);
 
