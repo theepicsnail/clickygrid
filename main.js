@@ -10,7 +10,7 @@ const game = {
     'user': null,
     'camera': null,
     'resources': null,
-    'chunkManager': null
+    'chunkManager': null,
 };
 
 function mapDefault(x, y) {
@@ -174,10 +174,14 @@ class User {
     }
 
     spawn() {
-        this.ref.set({
-            x: 0,
-            y: 0
-        });
+        const spawn = {x:0, y:0};
+        const hash = window.location.hash.substr(1);
+        if(hash) {
+            const args = hash.split(",");
+            spawn.x = parseInt(args[0])|0;
+            spawn.y = parseInt(args[1])|0;
+        }
+        this.ref.set(spawn);
     }
 
     update(details) {
@@ -224,6 +228,13 @@ class Camera {
         this.x = x;
         this.y = y;
         this.recomputeCamera();
+
+        if(this.updatingHash)return;
+        const T = this;
+        this.updatingHash = setTimeout(()=>{
+            window.location.hash = `${T.x},${T.y}`;
+            delete T.updatingHash;
+        },1000);
     }
 
     recomputeCamera() {
