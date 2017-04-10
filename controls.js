@@ -4,77 +4,122 @@
 class Controls {
     constructor(canvas) {
         this.canvas = canvas;
-        this.mouse = {
-            x : 0, //
-            y : 0,
-            lastX : 0,
-            lastY : 0,
-            pressed : false
+        const mouse = {
+            x: 0, //
+            y: 0,
+            startX: 0,
+            startY: 0,
+            lastX: 0,
+            lastY: 0,
+            pressed: false,
+            dragging: false
         };
 
-        this.setupMouseEvents();
-        this.setupTouchEvents();
-
+        const evts = {
+            press(e) {
+            },
+            release(e) {
+            },
+            click(e) {
+            },
+            drag(e) {
+            },
+            move(e) {
+            },
+        };
         // listen via
         // controls.on.press = (evt) {...};
-        this.on = {
-            press(e) {},
-            release(e) {},
-            click(e) {},
-            drag(e) {},
-            move(e) {},
-        };
+        this.on = evts;
+
+        function down(x, y) {
+            mouse.startX = mouse.x = x;
+            mouse.startY = mouse.y = y;
+            mouse.lastX = x;
+            mouse.lastY = y;
+            mouse.pressed = true;
+            mouse.dragging = false;
+            evts.press(mouse);
+        }
+
+        function move(x, y) {
+            mouse.lastX = mouse.x;
+            mouse.lastY = mouse.y;
+            mouse.x = x;
+            mouse.y = y;
+
+            if (mouse.pressed) {
+                if (Math.hypot(mouse.x - mouse.startX, mouse.y - mouse.startY) > 5)
+                    mouse.dragging = true;
+                if (mouse.dragging)
+                    evts.drag(mouse);
+            }
+            else
+                evts.move(mouse);
+        }
+
+        function up(x, y) {
+            if(!mouse.pressed) return;
+            mouse.x = x;
+            mouse.y = y;
+            mouse.lastX = x;
+            mouse.lastY = y;
+            mouse.pressed = false;
+            if(!mouse.dragging) evts.click(mouse);
+            mouse.dragging = false;
+            evts.release(mouse);
+        }
+
+        this.setupMouseEvents(down, move, up);
+        this.setupTouchEvents(down, move, up);
+
     }
 
-    nativeMouseEvent(e) {
-        this.mouse.lastX = this.mouse.x;
-        this.mouse.lastY = this.mouse.y;
-        let p = e;
-        if (p.touches && p.touches[0])
-            p = p.touches[0];
-        this.mouse.x = p.clientX;
-        this.mouse.y = p.clientY;
-        e.preventDefault();
-        e.stopPropagation();
-    }
+
     nativeTouchEvent(e) {
-        this.mouse.lastX = this.mouse.x;
-        this.mouse.lastY = this.mouse.y;
-        this.mouse.x = e.touches[0].clientX;
-        this.mouse.y = e.touches[0].clientY;
+        mouse.lastX = mouse.x;
+        mouse.lastY = mouse.y;
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
         e.preventDefault();
         e.stopPropagation();
     }
 
-    setupMouseEvents() {
-        let dragging = false;
+    setupMouseEvents(down, move, up) {
         this.canvas.onmousedown = (e) => {
-            dragging = false;
-            this.nativeMouseEvent(e);
-            this.mouse.pressed = true;
-            this.on.press(this.mouse);
+            e.preventDefault();
+            e.stopPropagation();
+            down(e.clientX, e.clientY);
         };
         this.canvas.onmousemove = (e) => {
-            this.nativeMouseEvent(e);
-            dragging = true;
-            if (this.mouse.pressed)
-                this.on.drag(this.mouse);
-            else
-                this.on.move(this.mouse);
+            e.preventDefault();
+            e.stopPropagation();
+            move(e.clientX, e.clientY);
         };
-        this.canvas.onmouseup = (e) => {
-            this.nativeMouseEvent(e);
-            this.mouse.pressed = false;
-            this.on.release(this.mouse);
-            if (!dragging)
-                this.on.click(this.mouse);
+        this.canvas.onmouseup = this.canvas.onmouseleave = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            up(e.clientX, e.clientY);
         };
     }
 
-    setupTouchEvents() {
-        const c = this.canvas;
-        this.canvas.addEventListener("touchstart", c.onmousedown);
-        this.canvas.addEventListener("touchend", c.onmouseup);
-        this.canvas.addEventListener("touchmove", c.onmousemove);
+    setupTouchEvents(down, move, up) {
+        let evt = null;
+        this.canvas.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            evt = e.touches[0];
+            down(evt.clientX, evt.clientY);
+        });
+        this.canvas.addEventListener("touchmove", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            evt = e.touches[0];
+            move(evt.clientX, evt.clientY);
+        });
+        this.canvas.addEventListener("touchend", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            up(evt.clientX, evt.clientY);
+        });
     }
 }
