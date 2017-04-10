@@ -13,13 +13,6 @@ const game = {
     'chunkManager': null
 };
 
-
-function posMod(a, b) {
-    var v = a % b;
-    if (v < 0) v += a;
-    return v;
-}
-
 function mapDefault(x, y) {
     let val = 0;
     let max = 0, min = 0;
@@ -83,7 +76,7 @@ class ChunkManager {
     }
 
     forEachChunk(cb) {
-        for (var c in this.loadedChunks) {
+        for (let c in this.loadedChunks) {
             cb(this.loadedChunks[c]);
         }
     }
@@ -115,13 +108,13 @@ class Chunk {
     }
 
     dbUpdate(update) {
-        if (update == null) {
+        if (update === null) {
             update = {};
         }
 
         this.values = {};
-        for (var y = 0; y < blockSize; y++)
-            for (var x = 0; x < blockSize; x++) {
+        for (let y = 0; y < blockSize; y++)
+            for (let x = 0; x < blockSize; x++) {
                 this.values[[x, y]] = update[[x, y]] || mapDefault(this.x * blockSize + x, this.y * blockSize + y);
             }
         this.redraw();
@@ -133,8 +126,8 @@ class Chunk {
     }
 
     redraw() {
-        for (var y = 0; y < blockSize; y++)
-            for (var x = 0; x < blockSize; x++) {
+        for (let y = 0; y < blockSize; y++)
+            for (let x = 0; x < blockSize; x++) {
                 let val = this.values[[x, y]]['value'];
                 game.resources.drawTile("tiles.png", val, 0, this.ctx, x * tileSize, y * tileSize);
             }
@@ -152,7 +145,7 @@ class Chunk {
         const next = {'value': ((this.values[[x, y]]['value'] || 0) + 1) % 4};
         const ref = this.ref.child(`${x},${y}`);
 
-        if (next.value == def.value)
+        if (next.value === def.value)
             ref.remove();
         else
             ref.set(next);
@@ -197,7 +190,7 @@ class Camera {
         if (game.camera)  throw new Error("Camera re-initialized");
         game.camera = this;
         this.canvas = document.getElementById("canvas");
-        this.ctx = canvas.getContext("2d");
+        this.ctx = this.canvas.getContext("2d");
         this.ctx.font = "30px Arial";
         this.ctx.fillStyle = "white";
 

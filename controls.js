@@ -4,7 +4,7 @@
 class Controls {
     constructor(canvas) {
         this.canvas = canvas;
-        const mouse = {
+        this.mouse = {
             x: 0, //
             y: 0,
             startX: 0,
@@ -15,7 +15,10 @@ class Controls {
             dragging: false
         };
 
-        const evts = {
+
+        // listen via
+        // controls.on.press = (evt) {...};
+        this.on = {
             press(e) {
             },
             release(e) {
@@ -27,99 +30,88 @@ class Controls {
             move(e) {
             },
         };
-        // listen via
-        // controls.on.press = (evt) {...};
-        this.on = evts;
 
-        function down(x, y) {
-            mouse.startX = mouse.x = x;
-            mouse.startY = mouse.y = y;
-            mouse.lastX = x;
-            mouse.lastY = y;
-            mouse.pressed = true;
-            mouse.dragging = false;
-            evts.press(mouse);
-        }
-
-        function move(x, y) {
-            mouse.lastX = mouse.x;
-            mouse.lastY = mouse.y;
-            mouse.x = x;
-            mouse.y = y;
-
-            if (mouse.pressed) {
-                if (Math.hypot(mouse.x - mouse.startX, mouse.y - mouse.startY) > 5)
-                    mouse.dragging = true;
-                if (mouse.dragging)
-                    evts.drag(mouse);
-            }
-            else
-                evts.move(mouse);
-        }
-
-        function up(x, y) {
-            if(!mouse.pressed) return;
-            mouse.x = x;
-            mouse.y = y;
-            mouse.lastX = x;
-            mouse.lastY = y;
-            mouse.pressed = false;
-            if(!mouse.dragging) evts.click(mouse);
-            mouse.dragging = false;
-            evts.release(mouse);
-        }
-
-        this.setupMouseEvents(down, move, up);
-        this.setupTouchEvents(down, move, up);
+        this.setupMouseEvents();
+        this.setupTouchEvents();
 
     }
 
-
-    nativeTouchEvent(e) {
-        mouse.lastX = mouse.x;
-        mouse.lastY = mouse.y;
-        mouse.x = e.touches[0].clientX;
-        mouse.y = e.touches[0].clientY;
-        e.preventDefault();
-        e.stopPropagation();
+    down(x, y) {
+        this.mouse.startX = this.mouse.x = x;
+        this.mouse.startY = this.mouse.y = y;
+        this.mouse.lastX = x;
+        this.mouse.lastY = y;
+        this.mouse.pressed = true;
+        this.mouse.dragging = false;
+        this.on.press(this.mouse);
     }
 
-    setupMouseEvents(down, move, up) {
+    move(x, y) {
+        this.mouse.lastX = this.mouse.x;
+        this.mouse.lastY = this.mouse.y;
+        this.mouse.x = x;
+        this.mouse.y = y;
+
+        if (this.mouse.pressed) {
+            if (Math.hypot(this.mouse.x - this.mouse.startX, this.mouse.y - this.mouse.startY) > 5)
+                this.mouse.dragging = true;
+            if (this.mouse.dragging)
+                this.on.drag(this.mouse);
+        }
+        else
+            this.on.move(this.mouse);
+    }
+
+    up(x, y) {
+        if (!this.mouse.pressed) return;
+        this.mouse.x = x;
+        this.mouse.y = y;
+        this.mouse.lastX = x;
+        this.mouse.lastY = y;
+        this.mouse.pressed = false;
+        if (!this.mouse.dragging) this.on.click(this.mouse);
+        this.mouse.dragging = false;
+        this.on.release(this.mouse);
+    }
+
+    setupMouseEvents() {
+        const T = this;
         this.canvas.onmousedown = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            down(e.clientX, e.clientY);
+            T.down(e.clientX, e.clientY);
         };
         this.canvas.onmousemove = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            move(e.clientX, e.clientY);
+            T.move(e.clientX, e.clientY);
         };
         this.canvas.onmouseup = this.canvas.onmouseleave = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            up(e.clientX, e.clientY);
+            T.up(e.clientX, e.clientY);
         };
     }
 
-    setupTouchEvents(down, move, up) {
+    setupTouchEvents() {
+        const T = this;
         let evt = null;
         this.canvas.addEventListener("touchstart", (e) => {
             e.preventDefault();
             e.stopPropagation();
             evt = e.touches[0];
-            down(evt.clientX, evt.clientY);
+            T.down(evt.clientX, evt.clientY);
         });
         this.canvas.addEventListener("touchmove", (e) => {
             e.preventDefault();
             e.stopPropagation();
             evt = e.touches[0];
-            move(evt.clientX, evt.clientY);
+            T.move(evt.clientX, evt.clientY);
         });
         this.canvas.addEventListener("touchend", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            up(evt.clientX, evt.clientY);
+            T.up(evt.clientX, evt.clientY);
         });
     }
 }

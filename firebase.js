@@ -1,4 +1,4 @@
-var config = {
+const config = {
     apiKey: "AIzaSyChgv4F6sgROm0Lkv2qbMMsLsyXytAkqgk",
     authDomain: "snail-53ef6.firebaseapp.com",
     databaseURL: "https://snail-53ef6.firebaseio.com",
@@ -10,7 +10,7 @@ firebase.initializeApp(config);
 
 firebase.auth().onAuthStateChanged((user) => {
     "use strict";
-    if (user == null)
+    if (user === null)
         return firebase.auth().signInAnonymously();
 
     const ref = firebase.database().ref(`users/${user.uid}`);
@@ -20,4 +20,3 @@ firebase.auth().onAuthStateChanged((user) => {
     }
     document.dispatchEvent(new CustomEvent('signed in', {detail: {user: user, ref: ref}}));
 });
-console.log("firebase.js");
