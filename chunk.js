@@ -1,7 +1,6 @@
 
 class Chunk {
     constructor(x, y) {
-        console.log("Load chunk", x, y);
         this.x = x;
         this.y = y;
         this.image = document.createElement("canvas");
@@ -33,7 +32,6 @@ class Chunk {
 
 
     unload() {
-        console.log("unload chunk", this.x, this.y);
         this.ref.off();
         delete this.image;
     }
