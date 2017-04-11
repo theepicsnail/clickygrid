@@ -57,43 +57,38 @@ class ChunkManager {
         if (game.chunkManager) throw new Error("ChunkManager re-initialized");
         game.chunkManager = this;
 
-        this.loadedChunks = {};
+        this.loadedChunks = new Map();
     }
 
+    /**
+     * @param {Set} chunkLocations
+     */
     ensureLoadedChunks(chunkLocations) {
-        let newInterestingChunks = {};
+        // chunkLocations = all locations we want.
+        // loadedChunks = all locations we have.
 
-        chunkLocations.forEach((location) => {
-            let c = this.loadedChunks[location];
-            if (c) {
-                newInterestingChunks[location] = c;
-                delete this.loadedChunks[location];
+        this.loadedChunks.forEach((chunk, key) => {
+            if (chunkLocations.has(key)) {
+                // we want to keep this chunk, remove its key from the 'locations we want'
+                chunkLocations.delete(key);
             } else {
-                newInterestingChunks[location] = new Chunk(location[0], location[1]);
+                // we don't want this chunk, unload it.
+                chunk.unload();
+                this.loadedChunks.delete(key);
             }
         });
-        for (let id in this.loadedChunks) {
-            this.loadedChunks[id].unload();
-        }
-        this.loadedChunks = newInterestingChunks;
-    }
 
-    forEachChunk(cb) {
-        for (let c in this.loadedChunks) {
-            cb(this.loadedChunks[c]);
-        }
-    }
-
-    getChunk(x, y) {
-        const c = this.loadedChunks[[x, y]];
-        if (c) return c;
-
+        // We're left with chunks we want but didn't have, load them.
+        chunkLocations.forEach((loc)=>{
+            let coords = loc.split(",");
+            this.loadedChunks.set(loc, new Chunk(parseInt(coords[0]),parseInt(coords[1])));
+        });
     }
 }
 
 class Chunk {
     constructor(x, y) {
-        //console.log("Load chunk", x, y);
+        console.log("Load chunk", x, y);
         this.x = x;
         this.y = y;
         this.image = document.createElement("canvas");
@@ -125,6 +120,7 @@ class Chunk {
 
 
     unload() {
+        console.log("unload chunk", this.x, this.y);
         this.ref.off();
         delete this.image;
     }
@@ -177,12 +173,12 @@ class User {
     }
 
     spawn() {
-        const spawn = {x:0, y:0};
+        const spawn = {x: 0, y: 0};
         const hash = window.location.hash.substr(1);
-        if(hash) {
+        if (hash) {
             const args = hash.split(",");
-            spawn.x = parseInt(args[0])|0;
-            spawn.y = parseInt(args[1])|0;
+            spawn.x = parseInt(args[0]) | 0;
+            spawn.y = parseInt(args[1]) | 0;
         }
         this.ref.set(spawn);
     }
@@ -206,17 +202,17 @@ class Camera {
 
         let last = null;
 
-        this.controls.on("pan press panstart", (e)=>{
-            if(last === null) {
+        this.controls.on("pan press panstart", (e) => {
+            if (last === null) {
                 last = e.center;
                 return;
             }
-            if(e.isFinal) {
+            if (e.isFinal) {
                 last = null;
                 return;
             }
             this.setCenter(this.x - e.center.x + last.x,
-                           this.y - e.center.y + last.y);
+                this.y - e.center.y + last.y);
 
             last = e.center;
         });
@@ -227,7 +223,7 @@ class Camera {
             const chunkY = Math.floor(worldY / pixelsPerChunk);
             const tileX = Math.floor((worldX - chunkX * pixelsPerChunk) / tileSize);
             const tileY = Math.floor((worldY - chunkY * pixelsPerChunk) / tileSize);
-            const chunk = game.chunkManager.getChunk(chunkX, chunkY);
+            const chunk = game.chunkManager.loadedChunks.get(`${chunkX},${chunkY}`);
             chunk.clicked(tileX, tileY);
         });
         window.onresize = () => {
@@ -243,12 +239,12 @@ class Camera {
         this.y = y;
         this.recomputeCamera();
 
-        if(this.updatingHash)return;
+        if (this.updatingHash)return;
         const T = this;
-        this.updatingHash = setTimeout(()=>{
+        this.updatingHash = setTimeout(() => {
             window.location.hash = `${T.x},${T.y}`;
             delete T.updatingHash;
-        },1000);
+        }, 1000);
     }
 
     recomputeCamera() {
@@ -260,17 +256,17 @@ class Camera {
         const screenBot = Math.ceil(this.y + h2);
 
         // Expand by 1 so that scrolling already has the next chunk.
-        const chunkLeft = Math.floor(this.screenLeft / pixelsPerChunk) -1;
-        const chunkTop = Math.floor(this.screenTop / pixelsPerChunk) -1;
+        const chunkLeft = Math.floor(this.screenLeft / pixelsPerChunk) - 1;
+        const chunkTop = Math.floor(this.screenTop / pixelsPerChunk) - 1;
         const chunkRight = Math.ceil(screenRight / pixelsPerChunk) + 1;
         const chunkBot = Math.ceil(screenBot / pixelsPerChunk) + 1;
 
         this.ctx.setTransform(1, 0, 0, 1, -this.screenLeft, -this.screenTop);
 
-        let chunkLocations = [];
+        let chunkLocations = new Set();
         for (let y = chunkTop; y < chunkBot; y++)
             for (let x = chunkLeft; x < chunkRight; x++) {
-                chunkLocations.push([x, y]);
+                chunkLocations.add(`${x},${y}`);
             }
         game.chunkManager.ensureLoadedChunks(chunkLocations);
         this.redrawAll();
@@ -284,7 +280,7 @@ class Camera {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.restore();
 
-        game.chunkManager.forEachChunk((chunk) => {
+        game.chunkManager.loadedChunks.forEach((chunk) => {
             this.redrawChunk(chunk);
         });
 
