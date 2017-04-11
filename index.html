@@ -7,24 +7,17 @@
         body {
             margin:0;
             touch-action: none;
+            overflow:hidden;
         }
         canvas {
             width:100%;
             height:100%;
 
         }
-        #stats {
-            position:absolute;
-            background:#ffffffcc;
-            width:100px;
-            height:100px;
-        }
     </style>
 </head>
 <body>
-<div id="stats"></div>
 <canvas id="canvas"></canvas>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 <script src="noise.js"></script>
 <script src="firebase.3.7.5.js"></script>
