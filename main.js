@@ -199,15 +199,27 @@ class Camera {
         this.ctx.font = "30px Arial";
         this.ctx.fillStyle = "white";
 
-        this.controls = new Controls(this.canvas);
-        this.controls.on.drag = (e) => {
-            const dx = e.x - e.lastX;
-            const dy = e.y - e.lastY;
-            this.setCenter(this.x - dx, this.y - dy);
-        };
-        this.controls.on.click = (e) => {
-            const worldX = e.x + this.screenLeft;
-            const worldY = e.y + this.screenTop;
+        this.controls = new Hammer(this.canvas);
+
+        let last = null;
+
+        this.controls.on("pan press panstart", (e)=>{
+            if(last === null) {
+                last = e.center;
+                return;
+            }
+            if(e.isFinal) {
+                last = null;
+                return;
+            }
+            this.setCenter(this.x - e.center.x + last.x,
+                           this.y - e.center.y + last.y);
+
+            last = e.center;
+        });
+        this.controls.on("tap", (e) => {
+            const worldX = e.center.x + this.screenLeft;
+            const worldY = e.center.y + this.screenTop;
             const chunkX = Math.floor(worldX / pixelsPerChunk);
             const chunkY = Math.floor(worldY / pixelsPerChunk);
             const tileX = Math.floor((worldX - chunkX * pixelsPerChunk) / tileSize);
@@ -215,7 +227,7 @@ class Camera {
 
             const chunk = game.chunkManager.getChunk(chunkX, chunkY);
             chunk.clicked(tileX, tileY);
-        };
+        });
         window.onresize = () => {
             this.canvas.width = window.innerWidth;
             this.canvas.height = window.innerHeight;
