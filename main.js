@@ -6,6 +6,9 @@ const blockSize = 16; // 8x8 tiles per block
 // (px/tile) * (tiles/chunk) = px/chunk
 const pixelsPerChunk = tileSize * blockSize;
 
+Math.seedrandom(3);
+const noise = new SimplexNoise();
+
 const game = {
     'user': null,
     'camera': null,
@@ -18,7 +21,7 @@ function mapDefault(x, y) {
     let max = 0, min = 0;
 
     function step(coordScale, valScale) {
-        val += noise.simplex2(x / coordScale, y / coordScale) * valScale;
+        val += noise.noise2D(x / coordScale, y / coordScale) * valScale;
         max += valScale;
         min -= valScale;
     }
@@ -225,6 +228,10 @@ class Camera {
             const tileX = Math.floor((worldX - chunkX * pixelsPerChunk) / tileSize);
             const tileY = Math.floor((worldY - chunkY * pixelsPerChunk) / tileSize);
 
+            console.log("--")
+            console.log("WorldX", worldX);
+            console.log("ChunkX", chunkX);
+            console.log("TileX", tileX);
             const chunk = game.chunkManager.getChunk(chunkX, chunkY);
             chunk.clicked(tileX, tileY);
         });
