@@ -227,11 +227,6 @@ class Camera {
             const chunkY = Math.floor(worldY / pixelsPerChunk);
             const tileX = Math.floor((worldX - chunkX * pixelsPerChunk) / tileSize);
             const tileY = Math.floor((worldY - chunkY * pixelsPerChunk) / tileSize);
-
-            console.log("--")
-            console.log("WorldX", worldX);
-            console.log("ChunkX", chunkX);
-            console.log("TileX", tileX);
             const chunk = game.chunkManager.getChunk(chunkX, chunkY);
             chunk.clicked(tileX, tileY);
         });
