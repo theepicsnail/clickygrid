@@ -30,7 +30,7 @@ class Debug {
             this.updateRequested_ = true;
             requestAnimationFrame(this.applyChanges.bind(this));
         }
-        return value;
+        return true;
     }
 
     deleteProperty(target, name) {
