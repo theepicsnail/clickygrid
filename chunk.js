@@ -1,4 +1,3 @@
-
 game.debug.values.chunkCount = 0;
 class Chunk {
     constructor(x, y) {
@@ -11,6 +10,28 @@ class Chunk {
 
         this.ctx = this.image.getContext("2d");
 
+
+    }
+
+    unload() {
+        game.debug.values.chunkCount--;
+        delete this.image;
+        return true;
+    }
+
+    /**
+     * Tile x,y was clicked on.
+     * @param x
+     * @param y
+     */
+    clicked(x, y) {
+
+    }
+}
+
+class FirebaseChunk extends Chunk {
+    constructor(x, y) {
+        super(x, y);
 
         this.ref = firebase.database().ref(`/chunks/${this.x},${this.y}`);
         this.ref.on('value', (v) => {
@@ -29,17 +50,7 @@ class Chunk {
             for (let x = 0; x < blockSize; x++) {
                 this.values[[x, y]] = update[[x, y]] || mapDefault(this.x * blockSize + x, this.y * blockSize + y);
             }
-        this.redraw();
-    }
 
-
-    unload() {
-        game.debug.values.chunkCount--;
-        this.ref.off();
-        delete this.image;
-    }
-
-    redraw() {
         for (let y = 0; y < blockSize; y++)
             for (let x = 0; x < blockSize; x++) {
                 let val = this.values[[x, y]]['value'];
@@ -49,11 +60,12 @@ class Chunk {
         game.camera.redrawChunk(this);
     }
 
-    /**
-     * Tile x,y was clicked on.
-     * @param x
-     * @param y
-     */
+    unload() {
+        super.unload();
+        this.ref.off();
+        return true;
+    }
+
     clicked(x, y) {
         const def = mapDefault(this.x * blockSize + x, this.y * blockSize + y);
         const next = {'value': ((this.values[[x, y]]['value'] || 0) + 1) % 4};
@@ -64,4 +76,50 @@ class Chunk {
         else
             ref.set(next);
     }
+
 }
+class TerrainDevChunk extends Chunk {
+    constructor(x, y) {
+        super(x, y);
+
+        const id = this.ctx.createImageData(pixelsPerChunk, pixelsPerChunk);
+        const data = id.data;
+        for (var x = 0; x < pixelsPerChunk; x++)
+            for (var y = 0; y < pixelsPerChunk; y++) {
+                let o = (x + y * pixelsPerChunk) * 4;
+                let d = mapDefault(this.x * pixelsPerChunk + x, this.y * pixelsPerChunk + y);
+                let color = [255, 0, 0];
+                switch (d.value) {
+                    case terrain.GOLD:
+                        color = [255, 128, 0];
+                        break;
+                    case terrain.STONE:
+                        color = [128, 128, 128];
+                        break;
+                    case terrain.SAND:
+                        color = [200, 150, 0];
+                        break;
+                    case terrain.GRASS:
+                        color = [0, 128, 0];
+                        break;
+                    case terrain.WATER:
+                        color = [0, 0, 128];
+                        break;
+                }
+                data[o + 0] = color[0];
+                data[o + 1] = color[1];
+                data[o + 2] = color[2];
+                data[o + 3] = 255;
+                // godata[0]=v;
+
+            }
+        this.ctx.putImageData(id, 0, 0);
+        game.camera.redrawChunk(this);
+    }
+
+    unload() {
+        return false;
+    }
+}
+
+const ChunkType = FirebaseChunk;//:TerrainDevChunk;

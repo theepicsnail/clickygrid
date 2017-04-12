@@ -19,15 +19,15 @@ class ChunkManager {
                 chunkLocations.delete(key);
             } else {
                 // we don't want this chunk, unload it.
-                chunk.unload();
-                this.loadedChunks.delete(key);
+                if(chunk.unload())
+                    this.loadedChunks.delete(key);
             }
         });
 
         // We're left with chunks we want but didn't have, load them.
         chunkLocations.forEach((loc) => {
             let coords = loc.split(",");
-            this.loadedChunks.set(loc, new Chunk(parseInt(coords[0]), parseInt(coords[1])));
+            this.loadedChunks.set(loc, new ChunkType(parseInt(coords[0]), parseInt(coords[1])));
         });
     }
 }
