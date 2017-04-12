@@ -72,6 +72,7 @@ class Camera {
             this.recomputeCamera();
         };
         window.onresize();
+        this.setCenter(0,0);
     }
 
     setCenter(x, y) {
@@ -134,10 +135,14 @@ class Camera {
     redrawChunk(chunk) {
         const x = chunk.x * pixelsPerChunk;
         const y = chunk.y * pixelsPerChunk;
-        this.ctx.beginPath();
+
         this.ctx.drawImage(chunk.image, x, y);
-        this.ctx.rect(x, y, pixelsPerChunk, pixelsPerChunk);
-        this.ctx.fillText(`(${chunk.x},${chunk.y})`, x + pixelsPerChunk / 2, y + pixelsPerChunk / 2);
-        this.ctx.stroke();
+
+        if(game.debug.values.showChunks) {
+            this.ctx.beginPath();
+            this.ctx.rect(x, y, pixelsPerChunk, pixelsPerChunk);
+            this.ctx.fillText(`(${chunk.x},${chunk.y})`, x + pixelsPerChunk / 2, y + pixelsPerChunk / 2);
+            this.ctx.stroke();
+        }
     }
 }
