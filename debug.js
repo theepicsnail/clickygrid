@@ -11,6 +11,7 @@ class Debug {
     }
 
     get(target, name) {
+        if(!target[name]) return false;
         return target[name].value;
     }
 
