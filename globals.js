@@ -14,6 +14,7 @@ const game = {
     'camera': null,
     'resources': null,
     'chunkManager': null,
+    'debug': new Debug()
 };
 
 function mapDefault(x, y) {

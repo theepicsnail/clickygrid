@@ -1,6 +1,8 @@
 
+game.debug.values.chunkCount = 0;
 class Chunk {
     constructor(x, y) {
+        game.debug.values.chunkCount++;
         this.x = x;
         this.y = y;
         this.image = document.createElement("canvas");
@@ -32,6 +34,7 @@ class Chunk {
 
 
     unload() {
+        game.debug.values.chunkCount--;
         this.ref.off();
         delete this.image;
     }

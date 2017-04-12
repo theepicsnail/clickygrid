@@ -14,6 +14,20 @@
             height:100%;
 
         }
+
+        #debug {
+            position: absolute;
+            left:0;
+            top:0;
+            padding:8px;
+            font-size:x-large;
+            background-color:rgba(255,255,255,.5);
+        }
+
+        #debug pre {
+            margin: 0;
+        }
+
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.0/seedrandom.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.3.0/simplex-noise.js"></script>
@@ -22,12 +36,15 @@
 </head>
 <body>
 <canvas id="canvas"></canvas>
+<div id="debug"></div>
 
+
+<script src="debug.js"></script>
+<script src="globals.js"></script>
 <script src="camera.js"></script>
 <script src="chunk.js"></script>
 <script src="chunkManager.js"></script>
 <script src="firebase.js"></script>
-<script src="globals.js"></script>
 <script src="resources.js"></script>
 <script src="user.js"></script>
 
