@@ -4,7 +4,7 @@ class Resources {
         game.resources = this;
 
         this.tiles = {};
-
+        // Tiles from: http://pixeljoint.com/pixelart/67541.htm
         this.addTileset("tiles.png");
     }
 
@@ -27,7 +27,9 @@ class Resources {
         img.src = url;
     }
 
-    drawTile(url, x, y, ctx, dx, dy) {
+    drawTile(url, tile, ctx, dx, dy) {
+        const x = tile % 16;
+        const y = (tile-x)/16;
         ctx.drawImage(this.tiles[url], x * tileSize, y * tileSize, tileSize, tileSize, dx, dy, tileSize, tileSize);
     }
 }

@@ -33,14 +33,14 @@ function mapDefault(x, y) {
     val = (val - min) / (max - min);
 
     let v = 0;
-    if (val < .2)
-        v = 0; // grey
-    else if (val < .4)
-        v = 1; // red
-    else if (val < .6)
-        v = 2; // green
+    if (val < .6)
+        v = 0; // grass
+    else if (val < .7)
+        v = 2; // dirt
+    else if (val < .8)
+        v = 1; // rock
     else
-        v = 3; // blue
+        v = 32; // blue
     return {value: v};
 }
 

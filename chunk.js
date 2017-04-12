@@ -40,7 +40,7 @@ class Chunk {
         for (let y = 0; y < blockSize; y++)
             for (let x = 0; x < blockSize; x++) {
                 let val = this.values[[x, y]]['value'];
-                game.resources.drawTile("tiles.png", val, 0, this.ctx, x * tileSize, y * tileSize);
+                game.resources.drawTile("tiles.png", val, this.ctx, x * tileSize, y * tileSize);
             }
 
         game.camera.redrawChunk(this);
