@@ -17,6 +17,14 @@ const game = {
     'debug': new Debug()
 };
 
+const terrain = {
+    WATER: 222,
+    SAND: 18,
+    GRASS: 0,
+    STONE: 1,
+    GOLD: 32
+};
+
 function mapDefault(x, y) {
     let val = 0;
     let max = 0, min = 0;
@@ -27,21 +35,32 @@ function mapDefault(x, y) {
         min -= valScale;
     }
 
-    step(1000, 1);
-    step(100, .5);
-    step(10, .25);
+    var large = 1024;
+    var small = 1;
+    for (var i = 1; i < 6; i++) {
+        step(large, small);
+        large /= 3;
+        small /= 2;
+    }
 
-    val = (val - min) / (max - min);
+    //step(10, .25);
 
-    let v = 0;
-    if (val < .6)
-        v = 0; // grass
-    else if (val < .7)
-        v = 2; // dirt
-    else if (val < .8)
-        v = 1; // rock
-    else
-        v = 32; // blue
-    return {value: v};
+    const v = (val - min) / (max - min);
+
+    if (v < .33) { // water
+        return {value: terrain.WATER};
+    } else if (v < .4) { // beach
+        return {value: terrain.SAND};
+    } else if (v < .6) { // grass
+        return {value: terrain.GRASS};
+    } else { // mountain
+
+        // mountain resources
+        if (v > .7 && noise.noise2D(x*2, y*2) > .5) {
+            return {value: terrain.GOLD};
+        }
+
+        return {value: terrain.STONE};
+    }
 }
 
