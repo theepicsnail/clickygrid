@@ -68,13 +68,21 @@ class FirebaseChunk extends Chunk {
 
     clicked(x, y) {
         const def = mapDefault(this.x * blockSize + x, this.y * blockSize + y);
-        const next = {'value': ((this.values[[x, y]]['value'] || 0) + 1) % 4};
+        let cur = this.values[[x, y]]['value'];
+        let next = terrain.GRASS;
+        switch(cur) {
+            case terrain.WATER: next = terrain.SAND; break;
+            case terrain.SAND: next = terrain.GRASS ;break;
+            case terrain.GRASS: next = terrain.STONE ;break;
+            case terrain.STONE: next = terrain.GOLD ;break;
+            case terrain.GOLD: next = terrain.WATER ;break;
+        }
         const ref = this.ref.child(`${x},${y}`);
 
         if (next.value === def.value)
             ref.remove();
         else
-            ref.set(next);
+            ref.set({'value': next});
     }
 
 }
