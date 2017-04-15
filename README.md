@@ -1,4 +1,4 @@
 # clickygrid
-infinite grid + firebase 
+infinite grid + firebase
 
 [Clicky time!](http://theepicsnail.github.io/clickygrid)
