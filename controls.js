@@ -5,7 +5,7 @@ class Controls {
       throw new Error("Controls re-initialized");
     game.controls = this;
 
-    this.mouseLayer = game.camera.topLayer;
+    this.mouseLayer = game.camera.topLayer.canvas;
     this.hammer = new Hammer(this.mouseLayer);
 
     this.setupPinchZoom();

@@ -53,7 +53,7 @@ class FirebaseChunk extends Chunk {
                                 y * tileSize);
       }
 
-    game.camera.redrawChunk(this);
+    game.chunkManager.publishEvent("update", this);
   }
 
   unload() {

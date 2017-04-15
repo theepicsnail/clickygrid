@@ -5,6 +5,17 @@ class ChunkManager {
     game.chunkManager = this;
 
     this.loadedChunks = new Map();
+
+    this.subscriptions = {};
+  }
+
+  subscribe(event, handler) {
+    this.subscriptions[event] = this.subscribe[event] || [];
+    this.subscriptions[event].push(handler);
+  }
+
+  publishEvent(event, ...args) {
+    (this.subscriptions[event] || []).forEach((cb) => cb(...args));
   }
 
   /**
