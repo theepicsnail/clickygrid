@@ -1,0 +1,21 @@
+{
+  "rules": {
+    "chunks": {
+      ".read": true,
+    	".write": "auth != null"
+    },
+    "users":{
+      ".read":true,
+      "$uid": {
+        "public": {
+          ".read": true,
+          ".write": "$uid == auth.uid"
+        },
+        "private": {
+          ".read": "$uid == auth.uid",
+          ".write": "$uid == auth.uid"
+        }
+      }
+    }
+  }
+}

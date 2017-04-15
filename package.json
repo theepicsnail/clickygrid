@@ -1,0 +1,19 @@
+{
+  "name": "clickygrid",
+  "version": "1.0.0",
+  "description": "infinite grid + firebase",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theepicsnail/clickygrid.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/theepicsnail/clickygrid/issues"
+  },
+  "homepage": "https://github.com/theepicsnail/clickygrid#readme"
+}

@@ -52,7 +52,7 @@ class FirebaseChunk extends Chunk {
     Promise
         .race([
           new Promise((res, rej) => { setTimeout(rej, 100); }),
-          game.resources.getTilesheet("tiles.png")
+          game.resources.getTilesheet("res/tiles.png")
               .then(this.drawTiles.bind(this))
               .catch(() => { this.drawText("Failed", "#800"); })
               .then(() => {
