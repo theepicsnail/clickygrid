@@ -40,6 +40,7 @@ class Controls {
 
   setupPanning() {
     let last = null;
+    this.hammer.get('pan').set({direction : Hammer.DIRECTION_ALL});
     this.hammer.on("pan press panstart", (e) => {
       if (last === null) {
         last = e.center;
