@@ -40,8 +40,8 @@ class Camera {
 
   moveCenter(dx, dy) { this.setCenter(this.worldX + dx, this.worldY + dy); }
   setCenter(x, y) {
-    this.worldX = x | 0;
-    this.worldY = y | 0;
+    this.worldX = x;
+    this.worldY = y;
     this.publishEvent("moved", this.worldX, this.worldY);
   }
 
@@ -95,11 +95,13 @@ class Camera {
 class Layer {
   constructor() {
     this.canvas = document.createElement("canvas");
+    this.canvas.style.imageRendering = "pixelated";
     this.ctx = this.canvas.getContext("2d");
     document.getElementById("layers").appendChild(this.canvas);
     game.camera.subscribe("resize", (width, height) => {
       this.canvas.width = width;
       this.canvas.height = height;
+      this.ctx.imageSmoothingEnabled = false;
       this.redrawAll();
     });
   }
@@ -162,6 +164,9 @@ class OverlayLayer extends Layer {
   setupLocationHash() {
     let updating = false;
     game.camera.subscribe("moved", (x, y) => {
+      // make the coords integers.
+      x |= 0;
+      y |= 0;
       game.debug.values.location = `${x},${y}`;
 
       if (updating)
