@@ -4,9 +4,7 @@ class Resources {
       throw new Error("Resources re-initialized");
     game.resources = this;
 
-    this.tiles = {};
-    // Tiles from: http://pixeljoint.com/pixelart/67541.htm
-    this.addTileset("tiles.png");
+    this.tilesets = new Map();
   }
 
   addTileset(url) {
@@ -16,23 +14,43 @@ class Resources {
     this.tiles[url] = [];
 
     const img = new Image();
-    img.onload = () => {
-      const rows = img.height / tileSize;
-      const cols = img.width / tileSize;
-      if (!Number.isInteger(rows) || !Number.isInteger(cols)) {
-        console.warn(`Image ${url} not evenly divisible by ${tileSize}`);
-        console.warn(img.width, img.height);
-        return;
-      }
-      this.tiles[url] = img;
-    };
+    img.onload = () => { this.tiles[url] = img; };
     img.src = url;
   }
 
-  drawTile(url, tile, ctx, dx, dy) {
+  drawTile(tilesheet, tile, ctx, dx, dy) {
     const x = tile % 16;
     const y = (tile - x) / 16;
-    ctx.drawImage(this.tiles[url], x * tileSize, y * tileSize, tileSize,
-                  tileSize, dx, dy, tileSize, tileSize);
+    ctx.drawImage(tilesheet, x * tileSize, y * tileSize, tileSize, tileSize, dx,
+                  dy, tileSize, tileSize);
+  }
+
+  /**
+   * Returns a promise that is resolved with the image. If the image is in cache
+   * this promise resolves immediately.
+   */
+  getTilesheet(url) {
+    if (this.tilesets.has(url)) {
+      return this.tilesets.get(url);
+    }
+
+    const img = new Image();
+    const p = new Promise((resolve, reject) => {
+      img.onload = () => {
+        const rows = img.height / tileSize;
+        const cols = img.width / tileSize;
+        if (!Number.isInteger(rows) || !Number.isInteger(cols)) {
+          console.warn(`Image ${url} not evenly divisible by ${tileSize}`);
+          console.warn(img.width, img.height);
+          reject();
+        } else {
+          resolve(img);
+        }
+      };
+      img.onerror = () => { reject(); };
+    });
+    this.tilesets.set(url, p);
+    img.src = url;
+    return p;
   }
 }

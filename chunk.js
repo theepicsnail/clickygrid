@@ -29,6 +29,9 @@ class FirebaseChunk extends Chunk {
   constructor(x, y) {
     super(x, y);
 
+    this.drawText("Loading...", "#000");
+    game.chunkManager.publishEvent("update", this);
+
     this.ref = firebase.database().ref(`/chunks/${this.x},${this.y}`);
     this.ref.on('value', (v) => { this.dbUpdate(v.val()); });
   }
@@ -46,14 +49,40 @@ class FirebaseChunk extends Chunk {
             mapDefault(this.x * blockSize + x, this.y * blockSize + y);
       }
 
+    Promise
+        .race([
+          new Promise((res, rej) => { setTimeout(rej, 100); }),
+          game.resources.getTilesheet("tiles.png")
+              .then(this.drawTiles.bind(this))
+              .catch(() => { this.drawText("Failed", "#800"); })
+              .then(() => {
+                game.chunkManager.publishEvent("update", this);
+                return true;
+              })
+        ])
+        .catch(() => {
+          this.drawText("Loading...", "#000");
+          game.chunkManager.publishEvent("update", this);
+        });
+  }
+
+  drawTiles(tiles) {
     for (let y = 0; y < blockSize; y++)
       for (let x = 0; x < blockSize; x++) {
         let val = this.values[[ x, y ]]['value'];
-        game.resources.drawTile("tiles.png", val, this.ctx, x * tileSize,
+        game.resources.drawTile(tiles, val, this.ctx, x * tileSize,
                                 y * tileSize);
       }
-
     game.chunkManager.publishEvent("update", this);
+  }
+
+  drawText(text, color) {
+    this.ctx.fillStyle = "#888888";
+    this.ctx.fillRect(0, 0, this.image.width, this.image.height);
+
+    this.ctx.fillStyle = color;
+    this.ctx.font = "30px Arial";
+    this.ctx.fillText(text, this.image.width / 2, this.image.height / 2);
   }
 
   unload() {
