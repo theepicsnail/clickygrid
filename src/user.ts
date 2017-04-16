@@ -1,4 +1,4 @@
-import * as firebase from 'firebase/app';
+import { game } from './globals';
 
 
 export class User {

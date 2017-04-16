@@ -1,4 +1,5 @@
-import { Chunk, ChunkType } from "./chunk";
+import { game } from './globals';
+import { Chunk, ChunkType } from './chunk';
 
 export class ChunkManager {
   subscriptions: {};

@@ -1,3 +1,5 @@
+import { game, tileSize } from './globals';
+
 export class Resources {
   tilesets: Map<any, any>;
   constructor() {

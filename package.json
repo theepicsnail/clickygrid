@@ -4,7 +4,8 @@
   "description": "infinite grid + firebase",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "./node_modules/.bin/webpack"
   },
   "repository": {
     "type": "git",
@@ -17,11 +18,17 @@
   },
   "homepage": "https://github.com/theepicsnail/clickygrid#readme",
   "dependencies": {
-    "@types/firebase": "^2.4.31",
-    "@types/hammerjs": "^2.0.34",
     "firebase": "^3.7.8",
     "hammerjs": "^2.0.8",
     "seedrandom": "^2.4.2",
     "simplex-noise": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/firebase": "^2.4.31",
+    "@types/hammerjs": "^2.0.34",
+    "@types/seedrandom": "^2.4.27",
+    "ts-loader": "^2.0.3",
+    "typescript": "^2.2.2",
+    "webpack": "^2.4.1"
   }
 }

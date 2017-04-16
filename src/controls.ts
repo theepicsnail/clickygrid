@@ -1,4 +1,5 @@
 import 'hammerjs';
+import { game } from './globals';
 
 export class Controls {
   hammer: HammerManager;
