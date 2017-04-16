@@ -1,5 +1,10 @@
 import * as globals from './globals';
 
+interface ExperimentalCSSStyleDeclaration extends CSSStyleDeclaration{
+  imageRendering: string;
+};
+
+
 export class Camera {
   layers: (TerrainLayer | OverlayLayer)[];
   subscriptions: {};
@@ -107,7 +112,7 @@ class Layer {
   canvas: HTMLCanvasElement;
   constructor() {
     this.canvas = document.createElement("canvas");
-    this.canvas.style.imageRendering = "pixelated";
+    (<ExperimentalCSSStyleDeclaration>this.canvas.style).imageRendering = "pixelated";
     this.ctx = this.canvas.getContext("2d");
     document.getElementById("layers").appendChild(this.canvas);
     globals.game.camera.subscribe("resize", (width, height) => {
@@ -157,7 +162,7 @@ class TerrainLayer extends Layer {
     this.ctx.font = "20px";
     this.ctx.drawImage(chunk.image, x, y);
 
-    if (globals.game.debug.values.showChunks) {
+    if (globals.game.debug.showChunks) {
       this.ctx.beginPath();
       this.ctx.rect(x, y, globals.pixelsPerChunk, globals.pixelsPerChunk);
       this.ctx.fillText(`(${chunk.x},${chunk.y})`, x + globals.pixelsPerChunk / 2,
@@ -179,13 +184,13 @@ class OverlayLayer extends Layer {
       // make the coords integers.
       x |= 0;
       y |= 0;
-      globals.game.debug.values.location = `${x},${y}`;
+      globals.game.debug.location = `${x},${y}`;
 
       if (updating)
         return;
       updating = true;
-      this.updatingHash = setTimeout(() => {
-        window.location.hash = globals.game.debug.values.location;
+      setTimeout(() => {
+        window.location.hash = globals.game.debug.location;
         updating = false;
       }, 1000);
     })

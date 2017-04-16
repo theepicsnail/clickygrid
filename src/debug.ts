@@ -1,38 +1,49 @@
 /**
  * Created by snail on 4/11/17.
  */
+
+class DebugProperties extends Object {
+  chunkCount: number;
+  showChunks: boolean;
+  location: string;
+}
+
 type DebugEntry = { value: any, elem: HTMLPreElement };
 type DebugMap = Map<PropertyKey, DebugEntry>;
 
-export class Debug implements ProxyHandler<DebugMap> {
+export class Debug implements ProxyHandler<DebugProperties> {
   updateRequested_: boolean;
-  values: DebugMap;
   toUpdate_: Set<PropertyKey>;
-  store_: Map<PropertyKey, any>;
-  div: HTMLDivElement;
+  proxy_: DebugProperties;
+  values_: DebugProperties;
+  div_: HTMLDivElement;
 
   constructor() {
-    this.div = document.getElementById("debug") as HTMLDivElement;
-    this.store_ = new Map<PropertyKey, DebugEntry>();
-    this.values = new Proxy<DebugMap>(this.store_, this);
-    this.toUpdate_ = new Set<PropertyKey>();
+    this.div_ = document.getElementById("debug") as HTMLDivElement;
     this.updateRequested_ = false;
-
+    this.toUpdate_ = new Set<PropertyKey>();
+    this.values_ = new DebugProperties();
+    this.proxy_ = new Proxy<DebugProperties>(this.values_, this);
   }
 
-  get(target: DebugMap, name: PropertyKey, receiver: any) {
-    if (!target.has(name))
+  getProxyObject(): DebugProperties {
+    return this.proxy_;
+  }
+
+
+  get(target: DebugProperties, name: PropertyKey, receiver: any) {
+    if (!target.hasOwnProperty(name))
       return false;
-    return target.get(name).value;
+    return target[name].value;
   }
 
-  set(target: DebugMap, name: PropertyKey, value: any, receiver: any) {
-    if (target.has(name)) {
-      target.get(name).value = value;
+  set(target: DebugProperties, name: PropertyKey, value: any, receiver: any) {
+    if(target.hasOwnProperty(name)){
+      target[name].value = value;
     } else {
-      target.set(name, { elem: this.createPre(), value: value });
+      target[name] = { elem: this.createPre(), value: value }
     }
-
+    
     this.toUpdate_.add(name);
     if (!this.updateRequested_) {
       this.updateRequested_ = true;
@@ -41,23 +52,23 @@ export class Debug implements ProxyHandler<DebugMap> {
     return true;
   }
 
-  deleteProperty(target: DebugMap, name: PropertyKey) {
-    if (!target.has(name)) return false;
-    target.get(name).elem.remove();
-    target.delete(name);
+  deleteProperty(target: DebugProperties, name: PropertyKey) {
+    if (!target.hasOwnProperty(name)) return false;
+    target[name].elemn.remove();
+    delete target[name];
     return true;
   }
 
   createPre() {
     const pre = document.createElement("pre");
-    this.div.appendChild(pre);
+    this.div_.appendChild(pre);
     return pre;
   }
 
   applyChanges() {
     this.toUpdate_.forEach((v) => {
-      const record = this.store_[v];
-      record.elem.innerText = `${v}: ${this.store_[v].value}`;
+      const record = this.values_[v];
+      record.elem.innerText = `${v}: ${record.value}`;
     });
     this.toUpdate_.clear();
     this.updateRequested_ = false;

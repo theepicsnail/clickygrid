@@ -12,9 +12,7 @@
       "node_modules/@types"
     ],
     "types": [
-      "firebase",
       "seedrandom"
-
     ],
     "lib": [
       "es2016",

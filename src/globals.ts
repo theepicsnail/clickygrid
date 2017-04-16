@@ -9,19 +9,15 @@ export const blockSize = 16; // 8x8 tiles per block
 // (px/tile) * (tiles/chunk) = px/chunk
 export const pixelsPerChunk = tileSize * blockSize;
 
-// Provided by seedrandom
-export interface Math {
-  seedrandom(seed: any)
-}
-
 // Provided by simplex-noise
 declare class SimplexNoise {
   constructor();
   noise2D(x: number, y: number): number;
 }
 
+// Provided by seed-random
+(<any>Math).seedrandom(3);
 
-Math.seedrandom(3);
 export const noise = new SimplexNoise();
 
 export const game = {
@@ -30,7 +26,7 @@ export const game = {
   'resources': null,
   'chunkManager': null,
   'controls': null,
-  'debug': new Debug()
+  'debug': new Debug().getProxyObject()
 };
 
 export const terrain = {

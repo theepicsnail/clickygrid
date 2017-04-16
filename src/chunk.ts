@@ -1,13 +1,13 @@
 import * as globals from './globals';
 
-globals.game.debug.values.chunkCount = 0;
+globals.game.debug.chunkCount = 0;
 export class Chunk {
   ctx: CanvasRenderingContext2D;
   image: HTMLCanvasElement;
   y: number;
   x: number;
   constructor(x, y) {
-    globals.game.debug.values.chunkCount++;
+    globals.game.debug.chunkCount++;
     this.x = x;
     this.y = y;
     this.image = document.createElement("canvas");
@@ -18,7 +18,7 @@ export class Chunk {
   }
 
   unload() {
-    globals.game.debug.values.chunkCount--;
+    globals.game.debug.chunkCount--;
     delete this.image;
     return true;
   }
@@ -130,7 +130,7 @@ class FirebaseChunk extends Chunk {
     }
     const ref = this.ref.child(`${x},${y}`);
 
-    if (next.value === def.value)
+    if (next === def.value)
       ref.remove();
     else
       ref.set({ 'value': next });
