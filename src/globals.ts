@@ -4,13 +4,13 @@
  */
 import { Debug } from "./debug";
 
-const tileSize = 32;  // 32x32 px per tile
-const blockSize = 16; // 8x8 tiles per block
+export const tileSize = 32;  // 32x32 px per tile
+export const blockSize = 16; // 8x8 tiles per block
 // (px/tile) * (tiles/chunk) = px/chunk
-const pixelsPerChunk = tileSize * blockSize;
+export const pixelsPerChunk = tileSize * blockSize;
 
 // Provided by seedrandom
-interface Math {
+export interface Math {
   seedrandom(seed: any)
 }
 
@@ -22,9 +22,9 @@ declare class SimplexNoise {
 
 
 Math.seedrandom(3);
-const noise = new SimplexNoise();
+export const noise = new SimplexNoise();
 
-const game = {
+export const game = {
   'user': null,
   'camera': null,
   'resources': null,
@@ -33,7 +33,7 @@ const game = {
   'debug': new Debug()
 };
 
-const terrain = {
+export const terrain = {
   WATER: 222,
   SAND: 18,
   GRASS: 0,
@@ -41,7 +41,7 @@ const terrain = {
   GOLD: 32
 };
 
-function mapDefault(x, y) {
+export function mapDefault(x, y) {
   let val = 0;
   let max = 0, min = 0;
 

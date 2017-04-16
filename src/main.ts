@@ -1,4 +1,4 @@
-
+/// <reference path="../node_modules/firebase/firebase.d.ts" />
 /**
  * Created by snail on 4/9/17.
  */

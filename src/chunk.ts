@@ -1,24 +1,24 @@
-import * as firebase from 'firebase/app';
+import * as globals from './globals';
 
-game.debug.values.chunkCount = 0;
+globals.game.debug.values.chunkCount = 0;
 export class Chunk {
   ctx: CanvasRenderingContext2D;
   image: HTMLCanvasElement;
   y: number;
   x: number;
   constructor(x, y) {
-    game.debug.values.chunkCount++;
+    globals.game.debug.values.chunkCount++;
     this.x = x;
     this.y = y;
     this.image = document.createElement("canvas");
-    this.image.width = pixelsPerChunk;
-    this.image.height = pixelsPerChunk;
+    this.image.width = globals.pixelsPerChunk;
+    this.image.height = globals.pixelsPerChunk;
 
     this.ctx = this.image.getContext("2d");
   }
 
   unload() {
-    game.debug.values.chunkCount--;
+    globals.game.debug.values.chunkCount--;
     delete this.image;
     return true;
   }
@@ -38,7 +38,7 @@ class FirebaseChunk extends Chunk {
     super(x, y);
 
     this.drawText("Loading...", "#000");
-    game.chunkManager.publishEvent("update", this);
+    globals.game.chunkManager.publishEvent("update", this);
 
     this.ref = firebase.database().ref(`/chunks/${this.x},${this.y}`);
     this.ref.on('value', (v) => { this.dbUpdate(v.val()); });
@@ -50,37 +50,44 @@ class FirebaseChunk extends Chunk {
     }
 
     this.values = {};
-    for (let y = 0; y < blockSize; y++)
-      for (let x = 0; x < blockSize; x++) {
+    for (let y = 0; y < globals.blockSize; y++)
+      for (let x = 0; x < globals.blockSize; x++) {
         const key = `${x},${y}`
-        this.values[key] = update[key] || mapDefault(this.x * blockSize + x, this.y * blockSize + y);
+        this.values[key] = update[key] ||
+            globals.mapDefault(
+              this.x * globals.blockSize + x,
+              this.y * globals.blockSize + y);
       }
 
     Promise
       .race([
         new Promise((res, rej) => { setTimeout(rej, 100); }),
-        game.resources.getTilesheet("res/tiles.png")
+        globals.game.resources.getTilesheet("res/tiles.png")
           .then(this.drawTiles.bind(this))
           .catch(() => { this.drawText("Failed", "#800"); })
           .then(() => {
-            game.chunkManager.publishEvent("update", this);
+            globals.game.chunkManager.publishEvent("update", this);
             return true;
           })
       ])
       .catch(() => {
         this.drawText("Loading...", "#000");
-        game.chunkManager.publishEvent("update", this);
+        globals.game.chunkManager.publishEvent("update", this);
       });
   }
 
   drawTiles(tiles) {
-    for (let y = 0; y < blockSize; y++)
-      for (let x = 0; x < blockSize; x++) {
+    for (let y = 0; y < globals.blockSize; y++)
+      for (let x = 0; x < globals.blockSize; x++) {
         let val = this.values[`${x},${y}`]['value'];
-        game.resources.drawTile(tiles, val, this.ctx, x * tileSize,
-          y * tileSize);
+        globals.game.resources.drawTile(
+          tiles,
+          val,
+          this.ctx,
+          x * globals.tileSize,
+          y * globals.tileSize);
       }
-    game.chunkManager.publishEvent("update", this);
+    globals.game.chunkManager.publishEvent("update", this);
   }
 
   drawText(text, color) {
@@ -99,24 +106,26 @@ class FirebaseChunk extends Chunk {
   }
 
   clicked(x, y) {
-    const def = mapDefault(this.x * blockSize + x, this.y * blockSize + y);
+    const def = globals.mapDefault(
+      this.x * globals.blockSize + x,
+      this.y * globals.blockSize + y);
     let cur = this.values[`${x},${y}`]['value'];
-    let next = terrain.GRASS;
+    let next = globals.terrain.GRASS;
     switch (cur) {
-      case terrain.WATER:
-        next = terrain.SAND;
+      case globals.terrain.WATER:
+        next = globals.terrain.SAND;
         break;
-      case terrain.SAND:
-        next = terrain.GRASS;
+      case globals.terrain.SAND:
+        next = globals.terrain.GRASS;
         break;
-      case terrain.GRASS:
-        next = terrain.STONE;
+      case globals.terrain.GRASS:
+        next = globals.terrain.STONE;
         break;
-      case terrain.STONE:
-        next = terrain.GOLD;
+      case globals.terrain.STONE:
+        next = globals.terrain.GOLD;
         break;
-      case terrain.GOLD:
-        next = terrain.WATER;
+      case globals.terrain.GOLD:
+        next = globals.terrain.WATER;
         break;
     }
     const ref = this.ref.child(`${x},${y}`);
@@ -133,28 +142,28 @@ class TerrainDevChunk extends Chunk {
     this.render();
   }
   render() {
-    const id = this.ctx.createImageData(pixelsPerChunk, pixelsPerChunk);
+    const id = this.ctx.createImageData(globals.pixelsPerChunk, globals.pixelsPerChunk);
     const data = id.data;
-    for (var x = 0; x < pixelsPerChunk; x++)
-      for (var y = 0; y < pixelsPerChunk; y++) {
-        let o = (x + y * pixelsPerChunk) * 4;
-        let d = mapDefault(this.x * pixelsPerChunk + x,
-          this.y * pixelsPerChunk + y);
+    for (var x = 0; x < globals.pixelsPerChunk; x++)
+      for (var y = 0; y < globals.pixelsPerChunk; y++) {
+        let o = (x + y * globals.pixelsPerChunk) * 4;
+        let d = globals.mapDefault(this.x * globals.pixelsPerChunk + x,
+          this.y * globals.pixelsPerChunk + y);
         let color = [255, 0, 0];
         switch (d.value) {
-          case terrain.GOLD:
+          case globals.terrain.GOLD:
             color = [255, 128, 0];
             break;
-          case terrain.STONE:
+          case globals.terrain.STONE:
             color = [128, 128, 128];
             break;
-          case terrain.SAND:
+          case globals.terrain.SAND:
             color = [200, 150, 0];
             break;
-          case terrain.GRASS:
+          case globals.terrain.GRASS:
             color = [0, 128, 0];
             break;
-          case terrain.WATER:
+          case globals.terrain.WATER:
             color = [0, 0, 128];
             break;
         }
@@ -165,7 +174,7 @@ class TerrainDevChunk extends Chunk {
         // godata[0]=v;
       }
     this.ctx.putImageData(id, 0, 0);
-    game.camera.redrawChunk(this);
+    globals.game.camera.redrawChunk(this);
   }
 
   unload() { return false; }

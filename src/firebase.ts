@@ -1,5 +1,3 @@
-import * as firebase from 'firebase/app';
-
 const config = {
   apiKey: "AIzaSyChgv4F6sgROm0Lkv2qbMMsLsyXytAkqgk",
   authDomain: "snail-53ef6.firebaseapp.com",

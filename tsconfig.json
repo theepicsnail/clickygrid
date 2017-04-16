@@ -1,13 +1,28 @@
 {
-    "compilerOptions":{
-        "module": "amd",
-        "target": "es6",
-        "outFile": "bundle.js",
-        "sourceMap": false,
-        "moduleResolution": "Classic"
-    },
-    "include": [
-        "src/**/*.ts"
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "baseUrl": "src",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "classic",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "es5",
+    "typeRoots": [
+      "node_modules/@types"
     ],
-    "compileOnSave": true
+    "types": [
+      "firebase",
+      "seedrandom"
+
+    ],
+    "lib": [
+      "es2016",
+      "dom"
+    ]
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "compileOnSave": true
 }

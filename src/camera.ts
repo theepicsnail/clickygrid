@@ -1,3 +1,5 @@
+import * as globals from './globals';
+
 export class Camera {
   layers: (TerrainLayer | OverlayLayer)[];
   subscriptions: {};
@@ -8,9 +10,9 @@ export class Camera {
   worldX: number;
 
   constructor() {
-    if (game.camera)
+    if (globals.game.camera)
       throw new Error("Camera re-initialized");
-    game.camera = this;
+    globals.game.camera = this;
 
     this.worldX = 0;
     this.worldY = 0;
@@ -82,10 +84,10 @@ export class Camera {
   screenPointToWorld(x, y) {
     const worldX = x / this.displayZoom + this.screenLeft;
     const worldY = y / this.displayZoom + this.screenTop;
-    const chunkX = Math.floor(worldX / pixelsPerChunk);
-    const chunkY = Math.floor(worldY / pixelsPerChunk);
-    const tileX = Math.floor((worldX - chunkX * pixelsPerChunk) / tileSize);
-    const tileY = Math.floor((worldY - chunkY * pixelsPerChunk) / tileSize);
+    const chunkX = Math.floor(worldX / globals.pixelsPerChunk);
+    const chunkY = Math.floor(worldY / globals.pixelsPerChunk);
+    const tileX = Math.floor((worldX - chunkX * globals.pixelsPerChunk) / globals.tileSize);
+    const tileY = Math.floor((worldY - chunkY * globals.pixelsPerChunk) / globals.tileSize);
     return { chunk: [chunkX, chunkY], tile: [tileX, tileY] };
   }
 
@@ -108,7 +110,7 @@ class Layer {
     this.canvas.style.imageRendering = "pixelated";
     this.ctx = this.canvas.getContext("2d");
     document.getElementById("layers").appendChild(this.canvas);
-    game.camera.subscribe("resize", (width, height) => {
+    globals.game.camera.subscribe("resize", (width, height) => {
       this.canvas.width = width;
       this.canvas.height = height;
       this.ctx.imageSmoothingEnabled = false;
@@ -123,18 +125,18 @@ class TerrainLayer extends Layer {
   constructor() {
     super();
     const worldUpdateHandler = this.worldUpdateHandler.bind(this);
-    game.camera.subscribe("moved", worldUpdateHandler);
-    game.camera.subscribe("zoomed", worldUpdateHandler);
-    game.camera.subscribe("resize", worldUpdateHandler);
-    game.chunkManager.subscribe("update", this.redrawChunk.bind(this));
+    globals.game.camera.subscribe("moved", worldUpdateHandler);
+    globals.game.camera.subscribe("zoomed", worldUpdateHandler);
+    globals.game.camera.subscribe("resize", worldUpdateHandler);
+    globals.game.chunkManager.subscribe("update", this.redrawChunk.bind(this));
   }
 
   worldUpdateHandler() {
-    const camera = game.camera;
-    const chunkLeft = Math.floor(camera.screenLeft / pixelsPerChunk) - 1;
-    const chunkTop = Math.floor(camera.screenTop / pixelsPerChunk) - 1;
-    const chunkRight = Math.ceil(camera.screenRight / pixelsPerChunk) + 1;
-    const chunkBot = Math.ceil(camera.screenBottom / pixelsPerChunk) + 1;
+    const camera = globals.game.camera;
+    const chunkLeft = Math.floor(camera.screenLeft / globals.pixelsPerChunk) - 1;
+    const chunkTop = Math.floor(camera.screenTop / globals.pixelsPerChunk) - 1;
+    const chunkRight = Math.ceil(camera.screenRight / globals.pixelsPerChunk) + 1;
+    const chunkBot = Math.ceil(camera.screenBottom / globals.pixelsPerChunk) + 1;
     camera.applyWorldTransform(this.ctx);
 
     let chunkLocations = new Set();
@@ -142,24 +144,24 @@ class TerrainLayer extends Layer {
       for (let x = chunkLeft; x < chunkRight; x++) {
         chunkLocations.add(`${x},${y}`);
       }
-    game.chunkManager.ensureLoadedChunks(chunkLocations);
+    globals.game.chunkManager.ensureLoadedChunks(chunkLocations);
 
-    game.chunkManager.loadedChunks.forEach((chunk) => { //
+    globals.game.chunkManager.loadedChunks.forEach((chunk) => { //
       this.redrawChunk(chunk);
     });
   }
 
   redrawChunk(chunk) {
-    const x = chunk.x * pixelsPerChunk;
-    const y = chunk.y * pixelsPerChunk;
+    const x = chunk.x * globals.pixelsPerChunk;
+    const y = chunk.y * globals.pixelsPerChunk;
     this.ctx.font = "20px";
     this.ctx.drawImage(chunk.image, x, y);
 
-    if (game.debug.values.showChunks) {
+    if (globals.game.debug.values.showChunks) {
       this.ctx.beginPath();
-      this.ctx.rect(x, y, pixelsPerChunk, pixelsPerChunk);
-      this.ctx.fillText(`(${chunk.x},${chunk.y})`, x + pixelsPerChunk / 2,
-        y + pixelsPerChunk / 2);
+      this.ctx.rect(x, y, globals.pixelsPerChunk, globals.pixelsPerChunk);
+      this.ctx.fillText(`(${chunk.x},${chunk.y})`, x + globals.pixelsPerChunk / 2,
+        y + globals.pixelsPerChunk / 2);
       this.ctx.stroke();
     }
   }
@@ -173,17 +175,17 @@ class OverlayLayer extends Layer {
 
   setupLocationHash() {
     let updating = false;
-    game.camera.subscribe("moved", (x, y) => {
+    globals.game.camera.subscribe("moved", (x, y) => {
       // make the coords integers.
       x |= 0;
       y |= 0;
-      game.debug.values.location = `${x},${y}`;
+      globals.game.debug.values.location = `${x},${y}`;
 
       if (updating)
         return;
       updating = true;
       this.updatingHash = setTimeout(() => {
-        window.location.hash = game.debug.values.location;
+        window.location.hash = globals.game.debug.values.location;
         updating = false;
       }, 1000);
     })
