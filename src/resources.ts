@@ -1,35 +1,25 @@
-class Resources {
+export class Resources {
+  tilesets: Map<any, any>;
   constructor() {
     if (game.resources)
       throw new Error("Resources re-initialized");
     game.resources = this;
 
-    this.tilesets = new Map();
+    this.tilesets = new Map<string, Promise<HTMLImageElement>>();
   }
 
-  addTileset(url) {
-    if (this.tiles[url])
-      return;
-
-    this.tiles[url] = [];
-
-    const img = new Image();
-    img.onload = () => { this.tiles[url] = img; };
-    img.src = url;
-  }
-
-  drawTile(tilesheet, tile, ctx, dx, dy) {
+  drawTile(tilesheet: HTMLImageElement, tile: number, ctx: CanvasRenderingContext2D, dx: number, dy: number) {
     const x = tile % 16;
     const y = (tile - x) / 16;
     ctx.drawImage(tilesheet, x * tileSize, y * tileSize, tileSize, tileSize, dx,
-                  dy, tileSize, tileSize);
+      dy, tileSize, tileSize);
   }
 
   /**
    * Returns a promise that is resolved with the image. If the image is in cache
    * this promise resolves immediately.
    */
-  getTilesheet(url) {
+  getTilesheet(url: string): Promise<HTMLImageElement> {
     if (this.tilesets.has(url)) {
       return this.tilesets.get(url);
     }

@@ -1,11 +1,15 @@
+import 'hammerjs';
 
-class Controls {
+export class Controls {
+  hammer: HammerManager;
+  mouseLayer: HTMLCanvasElement;
   constructor() {
     if (game.controls)
       throw new Error("Controls re-initialized");
     game.controls = this;
 
     this.mouseLayer = game.camera.topLayer.canvas;
+
     this.hammer = new Hammer(this.mouseLayer);
 
     this.setupPinchZoom();
@@ -16,7 +20,7 @@ class Controls {
 
   setupPinchZoom() {
     let baseZoom = null;
-    this.hammer.get('pinch').set({enable : true});
+    this.hammer.get('pinch').set({ enable: true });
     this.hammer.on("pinchstart", () => { //
       baseZoom = game.camera.zoom;
     });
@@ -40,7 +44,7 @@ class Controls {
 
   setupPanning() {
     let last = null;
-    this.hammer.get('pan').set({direction : Hammer.DIRECTION_ALL});
+    this.hammer.get('pan').set({ direction: Hammer.DIRECTION_ALL });
     this.hammer.on("pan press panstart", (e) => {
       if (last === null) {
         last = e.center;

@@ -1,29 +1,44 @@
+
 /**
  * Created by snail on 4/11/17.
  */
+import { Debug } from "./debug";
+
 const tileSize = 32;  // 32x32 px per tile
 const blockSize = 16; // 8x8 tiles per block
 // (px/tile) * (tiles/chunk) = px/chunk
 const pixelsPerChunk = tileSize * blockSize;
 
+// Provided by seedrandom
+interface Math {
+  seedrandom(seed: any)
+}
+
+// Provided by simplex-noise
+declare class SimplexNoise {
+  constructor();
+  noise2D(x: number, y: number): number;
+}
+
+
 Math.seedrandom(3);
 const noise = new SimplexNoise();
 
 const game = {
-  'user' : null,
-  'camera' : null,
-  'resources' : null,
-  'chunkManager' : null,
-  'controls' : null,
-  'debug' : new Debug()
+  'user': null,
+  'camera': null,
+  'resources': null,
+  'chunkManager': null,
+  'controls': null,
+  'debug': new Debug()
 };
 
 const terrain = {
-  WATER : 222,
-  SAND : 18,
-  GRASS : 0,
-  STONE : 1,
-  GOLD : 32
+  WATER: 222,
+  SAND: 18,
+  GRASS: 0,
+  STONE: 1,
+  GOLD: 32
 };
 
 function mapDefault(x, y) {
@@ -49,18 +64,18 @@ function mapDefault(x, y) {
   const v = (val - min) / (max - min);
 
   if (v < .33) { // water
-    return {value : terrain.WATER};
+    return { value: terrain.WATER };
   } else if (v < .4) { // beach
-    return {value : terrain.SAND};
+    return { value: terrain.SAND };
   } else if (v < .6) { // grass
-    return {value : terrain.GRASS};
+    return { value: terrain.GRASS };
   } else { // mountain
 
     // mountain resources
     if (v > .7 && noise.noise2D(x * 2, y * 2) > .5) {
-      return {value : terrain.GOLD};
+      return { value: terrain.GOLD };
     }
 
-    return {value : terrain.STONE};
+    return { value: terrain.STONE };
   }
 }

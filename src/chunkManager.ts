@@ -1,4 +1,8 @@
-class ChunkManager {
+import { Chunk, ChunkType } from "./chunk";
+
+export class ChunkManager {
+  subscriptions: {};
+  loadedChunks: Map<string, Chunk>;
   constructor() {
     if (game.chunkManager)
       throw new Error("ChunkManager re-initialized");
@@ -41,7 +45,7 @@ class ChunkManager {
     chunkLocations.forEach((loc) => {
       let coords = loc.split(",");
       this.loadedChunks.set(
-          loc, new ChunkType(parseInt(coords[0]), parseInt(coords[1])));
+        loc, new ChunkType(parseInt(coords[0]), parseInt(coords[1])));
     });
   }
 }

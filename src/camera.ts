@@ -1,4 +1,12 @@
-class Camera {
+export class Camera {
+  layers: (TerrainLayer | OverlayLayer)[];
+  subscriptions: {};
+  displayZoom: number;
+  displayHeight: number;
+  displayWidth: number;
+  worldY: number;
+  worldX: number;
+
   constructor() {
     if (game.camera)
       throw new Error("Camera re-initialized");
@@ -12,12 +20,12 @@ class Camera {
     this.displayZoom = 1;
 
     this.subscriptions = {};
-    this.layers = [ new TerrainLayer(), new OverlayLayer() ];
+    this.layers = [new TerrainLayer(), new OverlayLayer()];
 
     window.onresize =
-        () => { this.setSize(window.innerWidth, window.innerHeight); };
+      () => { this.setSize(window.innerWidth, window.innerHeight); };
     this.setCenter(0, 0);
-    window.onresize();
+    window.onresize(null);
   }
 
   subscribe(event, handler) {
@@ -78,7 +86,7 @@ class Camera {
     const chunkY = Math.floor(worldY / pixelsPerChunk);
     const tileX = Math.floor((worldX - chunkX * pixelsPerChunk) / tileSize);
     const tileY = Math.floor((worldY - chunkY * pixelsPerChunk) / tileSize);
-    return {chunk : [ chunkX, chunkY ], tile : [ tileX, tileY ]};
+    return { chunk: [chunkX, chunkY], tile: [tileX, tileY] };
   }
 
   /**
@@ -93,6 +101,8 @@ class Camera {
 }
 
 class Layer {
+  ctx: CanvasRenderingContext2D;
+  canvas: HTMLCanvasElement;
   constructor() {
     this.canvas = document.createElement("canvas");
     this.canvas.style.imageRendering = "pixelated";
@@ -106,7 +116,7 @@ class Layer {
     });
   }
 
-  redrawAll() {}
+  redrawAll() { }
 }
 
 class TerrainLayer extends Layer {
@@ -142,14 +152,14 @@ class TerrainLayer extends Layer {
   redrawChunk(chunk) {
     const x = chunk.x * pixelsPerChunk;
     const y = chunk.y * pixelsPerChunk;
-
+    this.ctx.font = "20px";
     this.ctx.drawImage(chunk.image, x, y);
 
     if (game.debug.values.showChunks) {
       this.ctx.beginPath();
       this.ctx.rect(x, y, pixelsPerChunk, pixelsPerChunk);
       this.ctx.fillText(`(${chunk.x},${chunk.y})`, x + pixelsPerChunk / 2,
-                        y + pixelsPerChunk / 2);
+        y + pixelsPerChunk / 2);
       this.ctx.stroke();
     }
   }

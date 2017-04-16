@@ -1,4 +1,9 @@
-class User {
+import * as firebase from 'firebase/app';
+
+
+export class User {
+  ref: firebase.database.Reference;
+  user: firebase.User;
   constructor(user, ref) {
     if (game.user)
       throw new Error("User re-initialized");
@@ -10,16 +15,18 @@ class User {
     this.setupListeners();
   }
 
-  setupListeners(){this.ref.on('value',
-                               (v) => {
-                                 v = v.val();
-                                 if (v === null)
-                                   return this.spawn();
-                                 return this.update(v);
-                               })}
+  setupListeners() {
+    this.ref.on('value',
+      (v) => {
+        v = v.val();
+        if (v === null)
+          return this.spawn();
+        return this.update(v);
+      })
+  }
 
   spawn() {
-    const spawn = {x : 0, y : 0};
+    const spawn = { x: 0, y: 0 };
     const hash = window.location.hash.substr(1);
     if (hash) {
       const args = hash.split(",");
