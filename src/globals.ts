@@ -26,6 +26,7 @@ export const game = {
   'resources': null,
   'chunkManager': null,
   'controls': null,
+  'layerManager': null,
   'debug': new Debug().getProxyObject()
 };
 

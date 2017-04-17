@@ -8,11 +8,13 @@ import { Controls } from "./controls";
 import { Resources } from "./resources";
 import { User } from "./user";
 import { initFirebase } from './firebase';
+import { LayerManager } from "./layers";
 
 initFirebase((user, ref)=>{
   new Resources();
   new User(user,ref);
   new ChunkManager();
   new Camera();
+  new LayerManager();
   new Controls();
 });
